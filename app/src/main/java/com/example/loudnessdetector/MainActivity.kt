@@ -100,9 +100,7 @@ class MainActivity : ComponentActivity() {
                             alerts = recentAlerts,
                             onNavigateBack = { navController.popBackStack() },
                             onNavigateEdit = { navController.navigate(Screen.EditDevice.createRoute(deviceId)) },
-                            onCalibrate = { viewModel.sendCommand(deviceId, "calibrate") },
-                            onRefresh = { viewModel.sendCommand(deviceId, "get_info") },
-                            onReset = { viewModel.sendCommand(deviceId, "reset_alarm") }
+                            onCalibrate = { viewModel.sendCommand(deviceId, "calibrate") }
                         )
                     }
                     

@@ -24,9 +24,7 @@ fun DeviceDetailScreen(
     alerts: List<DeviceAlert>,
     onNavigateBack: () -> Unit,
     onNavigateEdit: () -> Unit,
-    onCalibrate: () -> Unit,
-    onRefresh: () -> Unit,
-    onReset: () -> Unit
+    onCalibrate: () -> Unit
 ) {
     if (device == null) {
         Box(
@@ -139,33 +137,14 @@ fun DeviceDetailScreen(
             }
             
             // Control buttons
-            Row(
+            OutlinedButton(
+                onClick = onCalibrate,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                enabled = device.isOnline
             ) {
-                OutlinedButton(
-                    onClick = onCalibrate,
-                    modifier = Modifier.weight(1f),
-                    enabled = device.isOnline
-                ) {
-                    Text("Calibrate")
-                }
-                OutlinedButton(
-                    onClick = onRefresh,
-                    modifier = Modifier.weight(1f),
-                    enabled = device.isOnline
-                ) {
-                    Text("Refresh")
-                }
-                OutlinedButton(
-                    onClick = onReset,
-                    modifier = Modifier.weight(1f),
-                    enabled = device.isOnline
-                ) {
-                    Text("Reset")
-                }
+                Text("Calibrate")
             }
             
             Spacer(modifier = Modifier.height(16.dp))
