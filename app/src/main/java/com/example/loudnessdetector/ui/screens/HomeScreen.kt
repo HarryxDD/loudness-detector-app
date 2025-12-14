@@ -59,7 +59,7 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isConnected) "🟢 MQTT Connected" else "🔴 MQTT Disconnected",
+                        text = if (isConnected) "🟢 Firebase Connected" else "🔴 Firebase Disconnected",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold
                     )

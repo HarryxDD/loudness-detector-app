@@ -21,16 +21,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.loudnessdetector.ui.DeviceListViewModel
+import com.example.loudnessdetector.ui.FirebaseDeviceListViewModel
 import com.example.loudnessdetector.ui.Screen
 import com.example.loudnessdetector.ui.screens.DeviceDetailScreen
 import com.example.loudnessdetector.ui.screens.EditDeviceScreen
 import com.example.loudnessdetector.ui.screens.HomeScreen
 import com.example.loudnessdetector.ui.theme.LoudnessDetectorTheme
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : ComponentActivity() {
     
     private val CHANNEL_ID = "speech_alerts"
+    private val USER_ID = "user123"  // Hardcoded for now - use FirebaseAuth in production
     
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -44,11 +47,12 @@ class MainActivity : ComponentActivity() {
         
         createNotificationChannel()
         requestNotificationPermission()
+        initializeFirebase()
         
         setContent {
             LoudnessDetectorTheme {
                 val navController = rememberNavController()
-                val viewModel: DeviceListViewModel = viewModel()
+                val viewModel: FirebaseDeviceListViewModel = viewModel()
                 
                 val devices by viewModel.devices.collectAsState()
                 val isConnected by viewModel.isConnected.collectAsState()
@@ -96,11 +100,10 @@ class MainActivity : ComponentActivity() {
                         val device = devices.find { it.deviceId == deviceId }
                         
                         DeviceDetailScreen(
-                            device = device,
-                            alerts = recentAlerts,
+                            deviceId = deviceId,
+                            deviceName = device?.deviceName ?: "Device",
                             onNavigateBack = { navController.popBackStack() },
-                            onNavigateEdit = { navController.navigate(Screen.EditDevice.createRoute(deviceId)) },
-                            onCalibrate = { viewModel.sendCommand(deviceId, "calibrate") }
+                            onNavigateEdit = { navController.navigate(Screen.EditDevice.createRoute(deviceId)) }
                         )
                     }
                     
@@ -157,6 +160,37 @@ class MainActivity : ComponentActivity() {
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+    
+    private fun initializeFirebase() {
+        // Get FCM token and upload to Firebase
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                uploadFcmToken(token)
+                setDeviceOwners()
+            }
+        }
+    }
+    
+    private fun uploadFcmToken(token: String) {
+        val database = FirebaseDatabase.getInstance()
+        val tokenRef = database.getReference("users/$USER_ID/fcmToken")
+        tokenRef.setValue(token)
+    }
+    
+    private fun setDeviceOwners() {
+        // Set owner for all devices - in production, use proper device registration
+        val database = FirebaseDatabase.getInstance()
+        val devicesRef = database.getReference("devices")
+        
+        devicesRef.get().addOnSuccessListener { snapshot ->
+            snapshot.children.forEach { deviceSnapshot ->
+                val deviceId = deviceSnapshot.key ?: return@forEach
+                val ownerRef = database.getReference("devices/$deviceId/owner")
+                ownerRef.setValue(USER_ID)
             }
         }
     }

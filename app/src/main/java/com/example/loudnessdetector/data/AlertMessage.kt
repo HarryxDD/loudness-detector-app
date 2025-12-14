@@ -12,14 +12,6 @@ data class AlertMessage(
     val alarm_triggered: Boolean = false
 )
 
-data class StatusMessage(
-    val type: String = "",
-    val device_id: String = "",
-    val device_name: String = "",
-    val timestamp: Long = 0L,
-    val status: String = ""
-)
-
 data class CalibrationProgress(
     val type: String = "",
     val device_id: String = "",
