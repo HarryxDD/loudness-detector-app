@@ -38,11 +38,6 @@ fun HomeScreen(
                         MaterialTheme.colorScheme.errorContainer
                 )
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onAddDevice) {
-                Icon(Icons.Default.Add, contentDescription = "Add Device")
-            }
         }
     ) { padding ->
         Column(

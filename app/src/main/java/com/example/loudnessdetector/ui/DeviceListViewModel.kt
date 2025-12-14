@@ -99,8 +99,11 @@ class DeviceListViewModel(application: Application) : AndroidViewModel(applicati
     private fun handleStatusMessage(deviceId: String, message: String) {
         try {
             val json = gson.fromJson(message, JsonObject::class.java)
-            val rms = json.get("rms")?.asInt ?: 0
-            val zcr = json.get("zcr")?.asDouble ?: 0.0
+            
+            // Extract RMS/ZCR from "info" object
+            val infoObject = json.get("info")?.asJsonObject
+            val rms = infoObject?.get("last_rms")?.asInt ?: 0
+            val zcr = infoObject?.get("last_zcr")?.asDouble ?: 0.0
             
             viewModelScope.launch {
                 val currentDevices = devices.value.toMutableList()
@@ -199,7 +202,20 @@ class DeviceListViewModel(application: Application) : AndroidViewModel(applicati
     
     fun updateDevice(device: Device) {
         viewModelScope.launch {
-            repository.updateDevice(device)
+            // Use current in-memory device list to preserve all live data
+            val currentDevices = devices.value.toMutableList()
+            val index = currentDevices.indexOfFirst { it.deviceId == device.deviceId }
+            
+            if (index != -1) {
+                // Only update name and location, keep everything else unchanged
+                val currentDevice = currentDevices[index]
+                val updatedDevice = currentDevice.copy(
+                    deviceName = device.deviceName,
+                    location = device.location
+                )
+                currentDevices[index] = updatedDevice
+                repository.saveDevices(currentDevices)
+            }
         }
     }
     
