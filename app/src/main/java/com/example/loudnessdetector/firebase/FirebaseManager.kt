@@ -24,6 +24,18 @@ class FirebaseManager(private val deviceId: String) {
                     val data = snapshot.value as? Map<*, *>
                     if (data != null) {
                         val info = data["info"] as? Map<*, *>
+                        
+                        // Parse progress data from Firebase
+                        val progressData = data["progress"] as? Map<*, *>
+                        val progress = if (progressData != null) {
+                            CalibrationInfo(
+                                current = (progressData["current"] as? Long)?.toInt() ?: 0,
+                                total = (progressData["total"] as? Long)?.toInt() ?: 0,
+                                percentage = (progressData["percentage"] as? Long)?.toInt() ?: 0,
+                                message = (progressData["message"] as? String) ?: ""
+                            )
+                        } else null
+                        
                         val status = DeviceStatus(
                             timestamp = (data["timestamp"] as? Long) ?: System.currentTimeMillis(),
                             lastRms = (info?.get("last_rms") as? Long)?.toInt() ?: 0,
@@ -31,7 +43,8 @@ class FirebaseManager(private val deviceId: String) {
                             alarmState = (info?.get("alarm_state") as? String) ?: "IDLE",
                             status = (data["status"] as? String) ?: "online",
                             type = (data["type"] as? String) ?: "status",
-                            message = (data["message"] as? String)  // Get calibration progress message
+                            message = (data["message"] as? String),
+                            progress = progress
                         )
                         trySend(status)
                     }
@@ -206,7 +219,8 @@ data class DeviceStatus(
     val alarmState: String = "IDLE",
     val status: String = "online",
     val type: String = "status",
-    val message: String? = null  // For calibration progress messages
+    val message: String? = null,  // For calibration progress messages
+    val progress: CalibrationInfo? = null
 )
 
 data class DeviceMessage(
@@ -217,6 +231,13 @@ data class DeviceMessage(
     val rms: Int? = null,
     val zcr: Double? = null,
     val deviceId: String = ""
+)
+
+data class CalibrationInfo(
+    val current: Int = 0,
+    val message: String = "",
+    val percentage: Int = 0,
+    val total: Int = 0,
 )
 
 data class DeviceInfo(

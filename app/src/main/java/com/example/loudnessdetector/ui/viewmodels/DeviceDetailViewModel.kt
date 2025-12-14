@@ -84,13 +84,6 @@ class DeviceDetailViewModel(private val deviceId: String) : ViewModel() {
         viewModelScope.launch {
             _isCalibrating.value = true
             val success = firebaseManager.triggerCalibration()
-            if (success) {
-                // Calibration command sent successfully
-                // The calibration result will come through the messages listener
-            }
-            // Keep calibrating state for a few seconds
-            kotlinx.coroutines.delay(3000)
-            _isCalibrating.value = false
         }
     }
     
@@ -109,8 +102,7 @@ class DeviceDetailViewModel(private val deviceId: String) : ViewModel() {
                 // Check if type is calibration_progress
                 if (status?.type == "calibration_progress") {
                     _isCalibrating.value = true
-                    // Use the message field for progress display
-                    _calibrationProgress.value = status.message ?: "Calibrating..."
+                    _calibrationProgress.value = "Calibrating: ${status.progress?.percentage ?: 0}%"
                 } else if (status?.type == "calibration" || status?.type == "status") {
                     // Calibration finished or normal status
                     if (_isCalibrating.value) {

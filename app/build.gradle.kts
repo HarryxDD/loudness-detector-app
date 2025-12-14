@@ -65,11 +65,6 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-messaging")
     
-    // Keep MQTT for backward compatibility (optional - can be removed)
-    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
-    implementation("androidx.legacy:legacy-support-v4:1.0.0")
-    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
-    
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
     
